@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using MaxMind.GeoIP2;
 using PcapDotNet.Core;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.IpV4;
@@ -25,7 +25,11 @@ namespace NetTracker
 
         private Dictionary<string, bool> localAddressPrefixes;
 
+        private DatabaseReader reader;
+
+        private List<string> possibleDBLocations = new List<string> { "c:\\GeoLite2-Country.mmdb", "GeoLite2-Country.mmdb" };
         #region Public Methods
+
         public Tracker()
         {
             IgnoreLocalAddress = true;  // default is to ignore local addresses
@@ -36,6 +40,43 @@ namespace NetTracker
             AddLocalAddressPrefixes();
             table = new Dictionary<string, bool>();
             lastWrite = DateTime.Now;
+
+            foreach(var possible in possibleDBLocations)
+            {
+                if (File.Exists(possible))
+                {
+                    reader = new DatabaseReader(possible);
+                    break;
+                }
+            }
+            if (reader == null)
+            {
+                throw new FileNotFoundException("Can't find the GeoLite2-Country.mmdb database!");
+            }
+        }
+
+        public string GetCountry(string addr)
+        {
+            try
+            {
+                return reader.Country(addr).Country.ToString();
+            }
+            catch(Exception)
+            {
+                return "<Unknown>";
+            }
+        }
+
+        public bool IsNotInUSA(string addr)
+        {
+            try
+            {
+                return ("US" != reader.Country(addr).Country.IsoCode);
+            }
+            catch(Exception)
+            {
+                return true;
+            }
         }
 
         public void PacketHandler(Packet packet)
@@ -78,7 +119,10 @@ namespace NetTracker
                 if (!table.ContainsKey(addr))
                 {
                     table.Add(addr, true);
-                    Console.WriteLine($"Adding destination address: {addr}");
+                    if (IsNotInUSA(addr))
+                    {
+                        Console.WriteLine($"New address: {addr} in country {GetCountry(addr)}");
+                    }
                 }
             }
             if (table.Count > 0 && (ts - lastWrite) > TimeSpan.FromMinutes(LogFrequency))
@@ -89,7 +133,7 @@ namespace NetTracker
                 {
                     foreach(var key in table.Keys)
                     {
-                        writer.WriteLine(key);
+                        writer.WriteLine($"{key} in {GetCountry(key)}");
                     }
                 }
                 lastWrite = DateTime.Now;
