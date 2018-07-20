@@ -19,7 +19,7 @@ namespace NetTracker
 
         public string LogPath { get; set; }
 
-        private Dictionary<string, bool> table;
+        private Dictionary<string, DateTime> table;
 
         private DateTime lastWrite;
 
@@ -38,7 +38,7 @@ namespace NetTracker
 
             localAddressPrefixes = new Dictionary<string, bool>();
             AddLocalAddressPrefixes();
-            table = new Dictionary<string, bool>();
+            table = new Dictionary<string, DateTime>();
             lastWrite = DateTime.Now;
 
             foreach(var possible in possibleDBLocations)
@@ -118,7 +118,7 @@ namespace NetTracker
             {
                 if (!table.ContainsKey(addr))
                 {
-                    table.Add(addr, true);
+                    table.Add(addr, ts);
                     if (IsNotInUSA(addr))
                     {
                         Console.WriteLine($"New address: {addr} in country {GetCountry(addr)}");
@@ -128,16 +128,17 @@ namespace NetTracker
             if (table.Count > 0 && (ts - lastWrite) > TimeSpan.FromMinutes(LogFrequency))
             {
                 string fmt = "yyyy-MM-dd-hh-mm-ss-fff";
+                string fmt_file = "yyyy-MM-dd hh:mm:ss";
                 string fullPath = Path.Combine(LogPath, $"{ts.ToString(fmt)}.txt");
                 using (StreamWriter writer = new StreamWriter(fullPath))
                 {
                     foreach(var key in table.Keys)
                     {
-                        writer.WriteLine($"{key} in {GetCountry(key)}");
+                        writer.WriteLine($"{table[key].ToString(fmt_file)}\t{key}\t{GetCountry(key)}");
                     }
                 }
                 lastWrite = DateTime.Now;
-                table = new Dictionary<string, bool>();
+                table = new Dictionary<string, DateTime>();
             }
         }
 
