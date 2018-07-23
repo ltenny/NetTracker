@@ -26,5 +26,5 @@ Use
 - run NetTracker
 - unique IPs outside the USA are printed to the console. Suspect countries are printed in red. 
   All unique IPs are logged in files in the current directory
-- Tested under the latest version of Windows 10, you mileage will likely vary with other versions
+- Tested under the latest version of Windows 10, your mileage will likely vary with other versions
   
