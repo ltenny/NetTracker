@@ -1,5 +1,7 @@
 # NetTracker
-Uses PcapDotNet and MaxMind GeoIP to track the hosts their countrys a machine communicates with.
+This app uses PcapDotNet and MaxMind GeoIP to track IP destination addresses for all network communications from
+a specific NIC. This app requires Pcap.  The best way to get this is to install Wireshark (which installs Pcap). 
+If you are interested in this app, you'll also be interested in Wireshark.
 
 Summary
 -------
@@ -18,10 +20,11 @@ The indication of compromise we focus on here is outbound traffic to unexpected 
 
 Use
 ---
-
+- install Wireshark, this app used Pcap which is installed by the Wireshark installer
 - get the free GeoLite2 country database from https://dev.maxmind.com/geoip/geoip2/geolite2/
 - copy the database to either the current directory or in the root of the C:\
 - run NetTracker
-- unique IPs outside the USA are printed to the console. All unique IPs are logged in files in the
-  current directory
+- unique IPs outside the USA are printed to the console. Suspect countries are printed in red. 
+  All unique IPs are logged in files in the current directory
+- Tested under the latest version of Windows 10, you mileage will likely vary with other versions
   
