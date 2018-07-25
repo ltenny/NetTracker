@@ -25,6 +25,8 @@ namespace NetTracker
 
         private Dictionary<string, bool> localAddressPrefixes;
 
+        private Dictionary<string, bool> localAddresses;
+
         private DatabaseReader reader;
 
         private List<string> possibleDBLocations = new List<string> { "c:\\GeoLite2-Country.mmdb", "GeoLite2-Country.mmdb" };
@@ -38,8 +40,9 @@ namespace NetTracker
             LogFrequency = 5;           // default is 5 minutes
             LogPath = string.Empty;     // default log directory is the current directory
 
-            localAddressPrefixes = new Dictionary<string, bool>();
-            AddLocalAddressPrefixes();
+
+            InitLocalAddressPrefixes();
+            InitLocalAddresses();
             table = new Dictionary<string, DateTime>();
             lastWrite = DateTime.Now;
             InitBadActorsTable();
@@ -111,71 +114,84 @@ namespace NetTracker
         private void InitBadActorsTable()
         {
             // might be easier to to whitelist the good guys -;)
-            badActors = new Dictionary<string, bool>();
-            badActors.Add("AF", true);
-            badActors.Add("AL", true);
-            badActors.Add("AO", true);
-            badActors.Add("AR", true);
-            badActors.Add("AZ", true);
-            badActors.Add("BY", true);
-            badActors.Add("BJ", true);
-            badActors.Add("BG", true);
-            badActors.Add("KH", true);
-            badActors.Add("HR", true);
-            badActors.Add("EE", true);
-            badActors.Add("GA", true);
-            badActors.Add("GM", true);
-            badActors.Add("GN", true);
-            badActors.Add("GW", true);
-            badActors.Add("IR", true);
-            badActors.Add("CI", true);
-            badActors.Add("KZ", true);
-            badActors.Add("KE", true);
-            badActors.Add("KI", true);
-            badActors.Add("KG", true);
-            badActors.Add("LA", true);
-            badActors.Add("LV", true);
-            badActors.Add("LS", true);
-            badActors.Add("LR", true);
-            badActors.Add("LT", true);
-            badActors.Add("MW", true);
-            badActors.Add("MR", true);
-            badActors.Add("MU", true);
-            badActors.Add("MN", true);
-            badActors.Add("MZ", true);
-            badActors.Add("NR", true);
-            badActors.Add("NP", true);
-            badActors.Add("NI", true);
-            badActors.Add("KP", true);
-            badActors.Add("OM", true);
-            badActors.Add("PK", true);
-            badActors.Add("PS", true);
-            badActors.Add("RU", true);
-            badActors.Add("RO", true);
-            badActors.Add("RS", true);
-            badActors.Add("SC", true);
-            badActors.Add("SL", true);
-            badActors.Add("SK", true);
-            badActors.Add("SY", true);
-            badActors.Add("TJ", true);
-            badActors.Add("TH", true);
-            badActors.Add("TN", true);
-            badActors.Add("UA", true);
-            badActors.Add("UZ", true);
-            badActors.Add("VN", true);
-            badActors.Add("YE", true);
-            badActors.Add("ZM", true);
-            badActors.Add("ZW", true);
+            badActors = new Dictionary<string, bool>
+            {
+                { "AF", true },
+                { "AL", true },
+                { "AO", true },
+                { "AR", true },
+                { "AZ", true },
+                { "BY", true },
+                { "BJ", true },
+                { "BG", true },
+                { "KH", true },
+                { "HR", true },
+                { "EE", true },
+                { "GA", true },
+                { "GM", true },
+                { "GN", true },
+                { "GW", true },
+                { "IR", true },
+                { "CI", true },
+                { "KZ", true },
+                { "KE", true },
+                { "KI", true },
+                { "KG", true },
+                { "LA", true },
+                { "LV", true },
+                { "LS", true },
+                { "LR", true },
+                { "LT", true },
+                { "MW", true },
+                { "MR", true },
+                { "MU", true },
+                { "MN", true },
+                { "MZ", true },
+                { "NR", true },
+                { "NP", true },
+                { "NI", true },
+                { "KP", true },
+                { "OM", true },
+                { "PK", true },
+                { "PS", true },
+                { "RU", true },
+                { "RO", true },
+                { "RS", true },
+                { "SC", true },
+                { "SL", true },
+                { "SK", true },
+                { "SY", true },
+                { "TJ", true },
+                { "TH", true },
+                { "TN", true },
+                { "UA", true },
+                { "UZ", true },
+                { "VN", true },
+                { "YE", true },
+                { "ZM", true },
+                { "ZW", true }
+            };
         }
 
-        private void AddLocalAddressPrefixes()
+        private void InitLocalAddressPrefixes()
         {
-            localAddressPrefixes.Add("224", true);
-            localAddressPrefixes.Add("10", true);
-            localAddressPrefixes.Add("172", true);
-            localAddressPrefixes.Add("192", true);
-            localAddressPrefixes.Add("0", true);
-            localAddressPrefixes.Add("255", true);
+            localAddressPrefixes = new Dictionary<string, bool>
+            {
+                {"224", true },
+                {"10", true },
+                {"172", true },
+                {"192", true },
+                {"0", true },
+                {"255", true }
+            };
+        }
+
+        private void InitLocalAddresses()
+        {
+            localAddresses = new Dictionary<string, bool>()
+            {
+                {"239.255.255.250", true }
+            };
         }
 
         private bool IgnoreAddressFilter(string addr)
