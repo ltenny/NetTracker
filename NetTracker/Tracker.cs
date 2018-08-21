@@ -31,6 +31,7 @@ namespace NetTracker
 
         private List<string> possibleDBLocations = new List<string> { "c:\\GeoLite2-Country.mmdb", "GeoLite2-Country.mmdb" };
         private Dictionary<string, bool> badActors;
+        private Dictionary<string, bool> knownMalwareIPs;
 
         #region Public Methods
 
@@ -46,6 +47,7 @@ namespace NetTracker
             table = new Dictionary<string, DateTime>();
             lastWrite = DateTime.Now;
             InitBadActorsTable();
+            InitKnownMalwareIPs();
 
             foreach(var possible in possibleDBLocations)
             {
@@ -99,6 +101,11 @@ namespace NetTracker
             }
         }
 
+        public bool IsKnownMalware(string addr)
+        {
+            return knownMalwareIPs.ContainsKey(addr);
+        }
+
         public void PacketHandler(Packet packet)
         {
             IpV4Datagram ip = packet.Ethernet.IpV4;
@@ -110,6 +117,17 @@ namespace NetTracker
         #endregion // Public Methods
 
         #region Private Methods
+
+        private void InitKnownMalwareIPs()
+        {
+            knownMalwareIPs = new Dictionary<string, bool>
+            {
+                { "216.58.195.20", true },  // triggeredmail.appspot.com
+                { "38.128.66.209", true },  // pro.ip-api.com
+                { "104.25.166.24", true },  // s2.socialannex.com
+                { "104.25.167.24", true }   // s2.socialannex.com
+            };
+        }
 
         private void InitBadActorsTable()
         {
@@ -210,24 +228,22 @@ namespace NetTracker
             string fmt = "yyyy-MM-dd-hh-mm-ss-fff";
             string fmt_file = "yyyy-MM-dd hh:mm:ss";
 
+            if (IsBadActor(addr) || IsKnownMalware(addr))
+            {
+                var save = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{ts.ToString(fmt_file)}: New address: {addr} in country {GetCountry(addr)}");
+                Console.ForegroundColor = save;
+            }
+
             if (!IgnoreAddressFilter(addr))
             {
                 if (!table.ContainsKey(addr))
                 {
                     table.Add(addr, ts);
-                    if (IsBadActor(addr))
+                    if (IsNotInUSA(addr))
                     {
-                        var save = Console.ForegroundColor;
-                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"{ts.ToString(fmt_file)}: New address: {addr} in country {GetCountry(addr)}");
-                        Console.ForegroundColor = save;
-                    }
-                    else
-                    {
-                        if (IsNotInUSA(addr))
-                        {
-                            Console.WriteLine($"{ts.ToString(fmt_file)}: New address: {addr} in country {GetCountry(addr)}");
-                        }
                     }
                 }
             }
